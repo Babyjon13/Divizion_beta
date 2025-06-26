@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Квадратный контейнер</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    #control {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      width: 200px;
+      height: 200px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background: black;
+      border: 2px solid #dee2e6;
+      border-radius: 15px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      cursor: grab;
+      transition: transform 0.2s;
+      z-index: 1000;
+    }
+
+    #control:active {
+      transform: scale(0.95);
+      cursor: grabbing;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      background-image: url("./img/фактура фон.png");
+    }
+
+    .content-cube {
+      position: absolute;
+      aspect-ratio: 1/1;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+      transform-style: preserve-3d;
+    }
+    .like-mouse{
+      scale: 0.4;
+    }
+    .content-face {
+      position: absolute;
+      background-image: url("./img/фактура куб.jpg");
+      background-size: cover;
+      width: 100%;
+      aspect-ratio: 1/1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backface-visibility: hidden;
+      background-color: #333;
+      box-sizing: border-box;
+      transform-origin: center center;
+      
+    }
+    #content_1{
+            background-image: url(img/1.png);
+            background-size: cover;
+    }
+    #content_2{
+            background-image: url(img/2.png);
+            background-size: cover;
+    }  
+    #content_3{
+            background-image: url(img/3.png);
+            background-size: cover;
+          }
+        
+    #content_4{
+            background-image: url(img/4.png);
+            background-size: cover;
+    }
+        
+    #content_5{
+            background-image: url(img/5.png);
+            background-size: cover;
+
+    }
+        
+    #content_6{
+            background-image: url(img/6.png);
+            background-size: cover;
+    }
+    .content-face[data-face="front"]   { transform: translateZ(50vw); }
+    .content-face[data-face="back"]    { transform: rotateY(180deg) translateZ(50vw); }
+    .content-face[data-face="right"]   { transform: rotateY(90deg) translateZ(50vw); }
+    .content-face[data-face="left"]    { transform: rotateY(-90deg) translateZ(50vw); }
+    .content-face[data-face="top"]     { transform: rotateX(90deg) translateZ(50vw); }
+    .content-face[data-face="bottom"]  { transform: rotateX(-90deg) translateZ(50vw); }
+
+    .content {
+      width: 100vw;
+      height: 100vh;
+      background-color: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      z-index: 0;
+    }
+
+    .scale-down-center {
+      -webkit-animation: scale-down-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+      animation: scale-down-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    }
+
+    .scale-up-center {
+      -webkit-animation: scale-up-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+      animation: scale-up-center 0.4s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+    }
+
+    .buttons {
+      position: absolute;
+      z-index: 100;
+    }
+
+    @keyframes scale-down-center {
+      0% { transform: scale(1); }
+      100% { transform: scale(0.4); }
+    }
+
+    @keyframes scale-up-center {
+      0% { transform: scale(0.4); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Малый куб -->
+  <div id="control"></div>
+
+  <!-- Большой куб -->
+  <div id="content-wrapper">
+    <div class="content-cube" id="content-cube">
+      <div class="content-face" data-face="front">
+        <div class="content" id="content_1">content</div>
+      </div>
+      <div class="content-face" data-face="back">
+        <div class="content" id="content_2">contentzxZw</div>
+      </div>
+      <div class="content-face" data-face="right">
+        <div class="content" id="content_3">content</div>
+      </div>
+      <div class="content-face" data-face="left">
+        <div class="content" id="content_4">content</div>
+      </div>
+      <div class="content-face" data-face="top">
+        <div class="content" id="content_5">content</div>
+      </div>
+      <div class="content-face" data-face="bottom">
+        <div class="content" id="content_6">content</div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- Подключение библиотек -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script> 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script> 
+
+  <!-- JavaScript -->
+  <script>
+    
+    // === Three.js setup ===
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(200, 200);
+
+    const controlContainer = document.getElementById("control");
+    controlContainer.appendChild(renderer.domElement);
+    camera.position.z = 5;
+
+    // === Создание граней куба (плоскости) ===
+    const planeGeometry = new THREE.PlaneGeometry(1.8, 1.8);
+    const materials = [];
+
+    for (let i = 1; i <= 6; i++) {
+      const canvas = document.createElement("canvas");
+      const size = 512;
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext("2d");
+
+      ctx.fillStyle = "#34495e";
+      ctx.fillRect(0, 0, size, size);
+      ctx.font = "bold 200px Arial";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = "#ecf0f1";
+
+      ctx.fillText(i.toString().padStart(2, "0"), size / 2, size / 2);
+      materials.push(new THREE.MeshStandardMaterial({
+        map: new THREE.CanvasTexture(canvas),
+        side: THREE.DoubleSide
+      }));
+    }
+
+    const cubeGroup = new THREE.Group();
+
+    const positions = [
+      [0, 0, 0.9],
+      [0, 0, -0.9],
+      [0.9, 0, 0],
+      [-0.9, 0, 0],
+      [0, 0.9, 0],
+      [0, -0.9, 0]
+    ];
+
+    const rotations = [
+      [0, 0, 0],
+      [0, Math.PI, 0],
+      [0, Math.PI / 2, 0],
+      [0, -Math.PI / 2, 0],
+      [Math.PI / 2, 0, 0],
+      [-Math.PI / 2, 0, 0]
+    ];
+
+    positions.forEach((pos, i) => {
+      const mesh = new THREE.Mesh(planeGeometry, materials[i]);
+      mesh.position.set(...pos);
+
+        const faceNames = ["front", "back", "right", "left", "top", "bottom"];
+  mesh.userData = { face: faceNames[i] };
+
+      if ([4, 5].includes(i)) {
+        mesh.rotation.x = rotations[i][0];
+        mesh.scale.y = -1;
+      } else {
+        mesh.rotation.y = rotations[i][1];
+      }
+
+      cubeGroup.add(mesh);
+    });
+
+    scene.add(cubeGroup);
+
+    // === Освещение ===
+    scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+    const light = new THREE.DirectionalLight(0xffffff, 0.6);
+    light.position.set(5, 5, 5);
+    scene.add(light);
+
+    // === Анимация рендера ===
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // === Вращение мышью ===
+    let isDragging = false;
+    let previousMouse = { x: 0, y: 0 };
+
+    controlContainer.addEventListener("mousedown", e => {
+      isDragging = true;
+      previousMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    window.addEventListener("mouseup", () => isDragging = false);
+
+    window.addEventListener("mousemove", e => {
+      if (!isDragging) return;
+      const dx = e.clientX - previousMouse.x;
+      const dy = e.clientY - previousMouse.y;
+      cubeGroup.rotation.y += dx * 0.01;
+      cubeGroup.rotation.x += dy * 0.01;
+      previousMouse = { x: e.clientX, y: e.clientY };
+    });
+
+    // === Переменные для управления анимацией ===
+let isAnimating = false;
+let currentFace = "front";
+
+// Целевые повороты
+const faceRotations = {
+  front: { x: 0, y: 0 },
+  right: { x: 0, y: -Math.PI / 2 },
+  back: { x: 0, y: Math.PI },
+  left: { x: 0, y: Math.PI / 2 },
+  top: { x: Math.PI / 2, y: 0 },
+  bottom: { x: -Math.PI / 2, y: 0 }
+};
+
+// Функции коррекции угла
+function adjustAngle(current, target) {
+  let delta = target - current;
+  const twoPi = Math.PI * 2;
+  delta = ((delta % twoPi) + twoPi) % twoPi;
+  if (delta > Math.PI) delta -= twoPi;
+  return current + delta;
+}
+
+function adjustDegree(current, target) {
+  let delta = target - current;
+  delta = ((delta % 360) + 360) % 360;
+  if (delta > 180) delta -= 360;
+  return current + delta;
+}
+
+// Хранение текущего поворота CSS
+let currentCSSRotation = { x: 0, y: 0 };
+
+
+    // === Обработка кликов по грани малого куба ===
+ controlContainer.addEventListener("click", (e) => {
+  if (isAnimating) return;
+
+  const mouse = new THREE.Vector2();
+  const rect = controlContainer.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  const raycaster = new THREE.Raycaster();
+  raycaster.setFromCamera(mouse, camera);
+  const intersects = raycaster.intersectObjects(cubeGroup.children, true);
+
+  if (intersects.length > 0) {
+    const clickedFace = intersects[0].object.userData.face;
+    if (!clickedFace || clickedFace === currentFace) return;
+
+    isAnimating = true;
+    const card = document.getElementById('content-cube');
+
+    // Получаем текущие значения трансформации
+    const computedStyle = window.getComputedStyle(card);
+    const currentTransform = computedStyle.transform;
+
+    // Параметры анимации
+    const targetRotateX = faceRotations[clickedFace].x;
+    const targetRotateY = faceRotations[clickedFace].y;
+    const adjustedX = adjustAngle(cubeGroup.rotation.x, targetRotateX);
+    const adjustedY = adjustAngle(cubeGroup.rotation.y, targetRotateY);
+    const rotateXDeg = -targetRotateX * (180 / Math.PI);
+    const rotateYDeg = targetRotateY * (180 / Math.PI);
+    const adjustedRotateX = adjustDegree(currentCSSRotation.x, rotateXDeg);
+    const adjustedRotateY = adjustDegree(currentCSSRotation.y, rotateYDeg);
+
+    // Полная анимация через anime.js
+    anime.timeline({
+      easing: 'easeInOutQuad',
+      complete: () => {
+        isAnimating = false;
+        currentFace = clickedFace;
+        currentCSSRotation.x = adjustedRotateX;
+        currentCSSRotation.y = adjustedRotateY;
+      }
+    })
+    // 1. Фаза уменьшения
+    .add({
+      targets: card,
+      scale: 0.4,
+      rotateX: currentCSSRotation.x, // Явно сохраняем текущий поворот
+      rotateY: currentCSSRotation.y,
+      duration: 1000,
+      easing: 'easeOutBack'
+    })
+    // 2. Фаза поворота (и малого и большого куба одновременно)
+    .add({
+      targets: [cubeGroup.rotation, card],
+      x: [cubeGroup.rotation.x, adjustedX],
+      y: [cubeGroup.rotation.y, adjustedY],
+      rotateX: adjustedRotateX,
+      rotateY: adjustedRotateY,
+      duration: 1000,
+      easing: 'easeOutBack',
+      change: function() {
+        // Принудительный рендер Three.js сцены
+        renderer.render(scene, camera);
+      }
+    })
+    // 3. Фаза увеличения
+    .add({
+      targets: card,
+      rotateX: adjustedRotateX, // Явно сохраняем новый поворот
+      rotateY: adjustedRotateY,
+      scale: 1,
+      duration: 1000,
+    })
+  }
+});
+  </script>
+
+</body>
+</html>
